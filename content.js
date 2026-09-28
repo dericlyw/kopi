@@ -24,6 +24,27 @@ const CONTENT = {
   // elsewhere assumes this exact sequence.
   orderStatuses: ["NEW", "PREPARING", "READY", "COMPLETED"],
 
+  // Brew Streak loyalty. Built on habit design, not spend: customers earn
+  // one stamp per DAY they order (any amount), so the thing we reward is
+  // showing up. Every value here is safe to tune.
+  loyalty: {
+    programName: "Brew Streak",
+    stampsForReward: 8,                         // order-days per free drink
+    rewardMaxValue: 10.50,                      // free drink covers up to this price
+    drinkCategories: ["coffee", "tea", "cold"], // what the reward / pass can cover
+    restDayWindow: 7,                           // one missed day forgiven per this many days
+  },
+
+  // Prepaid pass: one drink a day covered for `days` days. Sold as a
+  // normal cart item (see product "pass01" below); activated on the
+  // customer's phone number when the order is placed.
+  pass: {
+    productId: "pass01",
+    name: "Daily Brew Pass",
+    days: 30,
+    maxValue: 10.50, // covers one drink per day up to this price
+  },
+
   categories: [
     { id: "coffee", name: "Coffee" },
     { id: "tea", name: "Tea & Non-Coffee" },
@@ -65,5 +86,8 @@ const CONTENT = {
     { id: "ictl01", category: "cold", name: "Iced Tea", desc: "House-brewed black tea, lightly sweetened, served cold.", price: 6.50, image: "images/cold.jpg" },
     { id: "smt01", category: "cold", name: "Mixed Berry Smoothie", desc: "Blended strawberries, blueberries, banana and yoghurt.", price: 12.00, image: "images/cold.jpg" },
     { id: "lmd01", category: "cold", name: "Fresh Lemonade", desc: "Fresh-squeezed lemon, mint, and soda water over ice.", price: 8.00, image: "images/cold.jpg" },
+
+    // ---- Pass (sold from the Rewards screen; "pass" has no menu tab) ----
+    { id: "pass01", category: "pass", name: "Daily Brew Pass — 30 days", desc: "One drink a day on us for 30 days. Just order as usual; we take it off at checkout.", price: 99.00, image: "images/pass.jpg" },
   ],
 };
