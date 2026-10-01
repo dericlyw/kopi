@@ -1,10 +1,9 @@
 /* =========================================================================
    THE DAILY BREW — script.js
    Customer ordering flow: browse → cart → checkout → place order → track.
-   Orders are persisted to localStorage under ORDERS_KEY in a structure
-   designed so a future staff page can read and update the same data.
-   Brew Streak loyalty + Daily Brew Pass members live under MEMBERS_KEY,
-   keyed by the digits of the customer's phone number.
+   Orders are persisted to localStorage under Loyalty.KEYS.orders; staff.html
+   reads and updates the same data. Brew Streak streak/stamp/pass rules
+   live in loyalty.js so both pages calculate them identically.
    ========================================================================= */
 
 (function () {
@@ -13,24 +12,19 @@
   const $ = (sel, ctx) => (ctx || document).querySelector(sel);
   const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
   const escapeHtml = (str) => String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const money = (n) => `$${n.toFixed(2)}`;
   const productById = (id) => CONTENT.products.find((p) => p.id === id);
 
-  const ORDERS_KEY = "dailybrew_orders";
-  const SEQ_KEY = "dailybrew_order_seq";
-  const MEMBERS_KEY = "dailybrew_members";
-  const MEMBER_PHONE_KEY = "dailybrew_member_phone";
+  const {
+    KEYS, loadJSON, saveJSON, money,
+    addDays, parseKey, todayKey, prettyDate,
+    getMember, saveMember, streakInfo, stampInfo, passActive, passReadyToday,
+  } = Loyalty;
+  const ORDERS_KEY = KEYS.orders;
+  const SEQ_KEY = KEYS.seq;
+  const MEMBER_PHONE_KEY = KEYS.memberPhone;
 
   const LOYALTY = CONTENT.loyalty;
   const PASS = CONTENT.pass;
-
-  function loadJSON(key, fallback) {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
-    catch (e) { return fallback; }
-  }
-  function saveJSON(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage unavailable */ }
-  }
 
   /* ----------------------------------------------------------------- *
    *  State
@@ -44,64 +38,9 @@
   };
 
   /* ----------------------------------------------------------------- *
-   *  Dates — local calendar days as "YYYY-MM-DD"
-   * ----------------------------------------------------------------- */
-  const pad2 = (n) => String(n).padStart(2, "0");
-  const dateKey = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-  const parseKey = (key) => { const [y, m, d] = key.split("-").map(Number); return new Date(y, m - 1, d); };
-  const addDays = (key, n) => { const d = parseKey(key); d.setDate(d.getDate() + n); return dateKey(d); };
-  const daysBetween = (a, b) => Math.round((parseKey(b) - parseKey(a)) / 864e5);
-  const todayKey = () => dateKey(new Date());
-  const prettyDate = (key) => parseKey(key).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
-
-  /* ----------------------------------------------------------------- *
    *  Members (Brew Streak + Daily Brew Pass)
    * ----------------------------------------------------------------- */
-  const phoneKey = (phone) => String(phone || "").replace(/\D/g, "");
-
-  function getMember(phone) {
-    const key = phoneKey(phone);
-    return key ? loadJSON(MEMBERS_KEY, {})[key] || null : null;
-  }
-  function saveMember(member) {
-    const all = loadJSON(MEMBERS_KEY, {});
-    all[phoneKey(member.phone)] = member;
-    saveJSON(MEMBERS_KEY, all);
-  }
   const rememberedPhone = () => loadJSON(MEMBER_PHONE_KEY, null);
-
-  // Walks back day by day from today. Today can't break the streak until
-  // it's over, and one missed day per restDayWindow is forgiven — so a
-  // single bad day doesn't wipe out weeks of showing up.
-  function streakInfo(member) {
-    const visits = new Set(member ? member.visitDays : []);
-    const today = todayKey();
-    const restDays = [];
-    let streak = 0;
-    let cursor = visits.has(today) ? today : addDays(today, -1);
-    for (;;) {
-      if (visits.has(cursor)) streak++;
-      else if (visits.has(addDays(cursor, -1)) &&
-               (restDays.length === 0 || daysBetween(cursor, restDays[restDays.length - 1]) >= LOYALTY.restDayWindow)) restDays.push(cursor);
-      else break;
-      cursor = addDays(cursor, -1);
-    }
-    return { streak, restDays, orderedToday: visits.has(today) };
-  }
-
-  function stampInfo(member) {
-    const stamps = member ? member.visitDays.length : 0;
-    const perReward = LOYALTY.stampsForReward;
-    const earned = Math.floor(stamps / perReward);
-    return {
-      stamps,
-      progress: stamps % perReward,
-      available: Math.max(0, earned - (member ? member.rewardsRedeemed : 0)),
-    };
-  }
-
-  const passActive = (member) => !!(member && member.passUntil && member.passUntil >= todayKey());
-  const passReadyToday = (member) => passActive(member) && member.passLastUsed !== todayKey();
 
   const cheapestItemPrice = () => Math.min(...CONTENT.products.filter((p) => p.category !== "pass").map((p) => p.price));
 
@@ -223,7 +162,18 @@
   function renderStreakBanner() {
     const member = getMember(rememberedPhone());
     const banner = $("#streak-banner");
-    if (!member) { banner.hidden = true; return; }
+    if (!member) {
+      banner.innerHTML = `
+        <div class="streak-banner-text">
+          <strong>☕ ${escapeHtml(LOYALTY.programName)}: a free drink every ${LOYALTY.stampsForReward} days you visit</strong>
+          <span>One stamp per day you order, whatever you spend. Your first order starts your streak.</span>
+        </div>
+        <div class="streak-banner-actions">
+          <button class="btn btn-ghost" data-go="rewards" type="button">How it works</button>
+        </div>`;
+      banner.hidden = false;
+      return;
+    }
     const info = streakInfo(member);
     const s = stampInfo(member);
     const perks = [];
@@ -479,7 +429,8 @@
    * ----------------------------------------------------------------- */
   function initCheckoutSelects() {
     $("#co-type").innerHTML = CONTENT.orderTypes.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
-    $("#co-payment").innerHTML = CONTENT.paymentMethods.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+    $("#co-privacy").textContent = CONTENT.privacyNote;
+    $("#co-payment").innerHTML =CONTENT.paymentMethods.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
   }
 
   function renderCheckoutSummary() {
@@ -573,6 +524,7 @@
     saveJSON(ORDERS_KEY, orders);
 
     const visit = recordVisit(order, pricing);
+    if (CONTENT.kioskMode) saveJSON(MEMBER_PHONE_KEY, null); // shared tablet: next customer starts clean
 
     state.lastOrderNumber = orderNumber;
     state.cart = [];

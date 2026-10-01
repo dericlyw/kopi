@@ -69,6 +69,7 @@
           <label for="co-phone">Contact number</label>
           <input type="tel" id="co-phone" name="phone" required>
           <span class="field-error" id="co-phone-error"></span>
+          <span class="field-note" id="co-privacy"></span>
         </div>
         <div class="form-row">
           <label for="co-type">Order type</label>
@@ -162,7 +163,7 @@
   <div class="cart-items" id="cart-items"></div>
   <p class="cart-empty" id="cart-empty" hidden>Your cart is empty — add something tasty from the menu.</p>
   <div class="cart-footer" id="cart-footer">
-    <div class="cart-total-row"><span>Total</span><strong id="cart-total">$0.00</strong></div>
+    <div class="cart-total-row"><span>Total</span><strong id="cart-total"></strong></div>
     <button class="btn btn-primary btn-block" id="cart-checkout-btn" type="button">Continue to checkout</button>
   </div>
 </aside>
@@ -177,6 +178,7 @@
 </footer>
 
 <script src="content.js"></script>
+<script src="loyalty.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

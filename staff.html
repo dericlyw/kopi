@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff — The Daily Brew</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="staff-page">
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-icon" aria-hidden="true">☕</span>
+      <span class="logo-text" id="staff-title">Staff</span>
+    </a>
+    <nav class="main-nav">
+      <button class="nav-link is-active" data-tab="orders" type="button">Orders</button>
+      <button class="nav-link" data-tab="pilot" type="button">Pilot results</button>
+      <button class="nav-link" data-tab="members" type="button">Members</button>
+    </nav>
+    <a class="btn btn-ghost staff-shop-link" href="index.html">Open shop ↗</a>
+  </div>
+</header>
+
+<main id="main" class="staff-main">
+
+  <section class="staff-tab is-active" data-panel="orders">
+    <div class="staff-head">
+      <h1>Order queue</h1>
+      <p class="staff-sub">New orders appear automatically. Tap a button to move an order to the next stage.</p>
+    </div>
+    <div class="queue-cols" id="queue-cols"></div>
+    <details class="staff-done">
+      <summary>Completed today <span id="done-count"></span></summary>
+      <div class="queue-list" id="done-list"></div>
+    </details>
+  </section>
+
+  <section class="staff-tab" data-panel="pilot">
+    <div class="staff-head">
+      <h1>Pilot results</h1>
+      <p class="staff-sub">Is the system changing behaviour? Watch repeat rate and active streaks week by week.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <h2 class="staff-h2">Orders per day — last 14 days</h2>
+    <div class="day-bars" id="day-bars"></div>
+    <div class="staff-actions">
+      <button class="btn btn-primary" id="export-orders" type="button">Download orders (CSV)</button>
+      <button class="btn btn-ghost" id="export-members" type="button">Download members (CSV)</button>
+      <button class="btn btn-ghost danger" id="reset-data" type="button">Clear all test data</button>
+    </div>
+  </section>
+
+  <section class="staff-tab" data-panel="members">
+    <div class="staff-head">
+      <h1>Members</h1>
+      <p class="staff-sub">Everyone who has ordered with a phone number, newest activity first.</p>
+    </div>
+    <div class="table-wrap"><table class="staff-table" id="members-table"></table></div>
+  </section>
+
+</main>
+
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<script src="content.js"></script>
+<script src="loyalty.js"></script>
+<script src="staff.js"></script>
+</body>
+</html>

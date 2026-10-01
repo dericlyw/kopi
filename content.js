@@ -16,6 +16,17 @@ const CONTENT = {
     hours: "Mon – Sun, 8:00am – 8:00pm",
   },
 
+  currency: "RM",
+
+  // true  = one shared counter tablet: the customer's number is forgotten
+  //         after each order, so the next customer never sees it.
+  // false = customers order on their own phones: the number is remembered
+  //         on that phone for the streak banner and "Order my usual".
+  kioskMode: false,
+
+  // Shown under the phone field at checkout (PDPA notice).
+  privacyNote: "We use your number only for this order and your Brew Streak stamps. We never share it or send marketing without asking.",
+
   // Shown in the checkout form.
   orderTypes: ["Dine-in", "Takeaway", "Delivery"],
   paymentMethods: ["Cash", "Card", "E-Wallet"],
