@@ -34,3 +34,17 @@ Compare the first two weeks against the last two.
 
 ## Files
 `content.js` (all editable content and rules) · `loyalty.js` (shared storage, dates, streak/stamp/pass logic) · `script.js` (customer page) · `staff.js` (staff page) · `style.css`
+
+## Claude Code: VOICE writing workflow
+This repo also carries a Claude Code skill that turns a topic or rough draft into writing that doesn't read as AI-made. Type `/voice <topic or path to draft>` in Claude Code.
+
+| Stage | What it does | Runs as |
+|---|---|---|
+| **O** Owned | Interviews you one question at a time for 5 personal details before writing | Main conversation |
+| **I** Insightful | "Most people believe X / I believe Y / the difference is Z", then a skeptic asks "So what?" | `voice-insight` + you |
+| **V** Verified | Extracts every claim and checks it against primary sources | `voice-verifier` |
+| **C** Clear | 9-year-old restatement, jargon swaps, heavy sentences | `voice-clarity` |
+| **E** Engaging | Strips AI tells and fluff, stronger hook and closing; you sign off | `voice-engagement` + you |
+
+Single stages: `/voice verify <draft>`, `/voice interview <topic>`, `/voice redteam <thesis>`, `/voice clarify <draft>`, `/voice engage <draft>`.
+Files: `.claude/skills/voice/` (workflow, interview bank, AI-tells list, register profiles) and `.claude/agents/voice-*.md`. Working drafts go to `voice-work/` (git-ignored).
