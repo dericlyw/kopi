@@ -132,6 +132,7 @@
     $$(".screen").forEach((s) => s.classList.toggle("is-active", s.dataset.screen === name));
     $$(".nav-link").forEach((btn) => btn.classList.toggle("is-active", btn.dataset.go === name));
     closeCart();
+    updateCartBadge();
     if (name === "menu") renderStreakBanner();
     if (name === "rewards") showRememberedRewards();
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -384,6 +385,11 @@
     const badge = $("#cart-badge");
     badge.textContent = String(n);
     badge.hidden = n === 0;
+
+    // Phones: keep the cart one thumb-tap away while browsing the menu.
+    $("#cart-bar").hidden = n === 0 || state.screen !== "menu";
+    $("#cart-bar-count").textContent = String(n);
+    $("#cart-bar-total").textContent = money(cartTotal());
   }
 
   function renderCart() {
@@ -627,6 +633,7 @@
     });
 
     $("#cart-open-btn").addEventListener("click", openCart);
+    $("#cart-bar").addEventListener("click", openCart);
     $("#cart-close-btn").addEventListener("click", closeCart);
     $("#cart-backdrop").addEventListener("click", closeCart);
     $("#cart-checkout-btn").addEventListener("click", goToCheckout);
@@ -653,7 +660,17 @@
   /* ----------------------------------------------------------------- *
    *  Boot
    * ----------------------------------------------------------------- */
+  // Sticky category tabs sit just under the header, whose height
+  // changes when the nav wraps onto its own row on phones.
+  function trackHeaderHeight() {
+    const header = $(".site-header");
+    const set = () => document.documentElement.style.setProperty("--header-h", `${header.offsetHeight}px`);
+    set();
+    if ("ResizeObserver" in window) new ResizeObserver(set).observe(header);
+  }
+
   function init() {
+    trackHeaderHeight();
     renderBranding();
     renderCategoryTabs();
     renderProductGrid();

@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFF8EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C140D" media="(prefers-color-scheme: dark)">
 <title>The Daily Brew — Order Online</title>
 <meta name="description" content="Order coffee, tea, pastries and more online from The Daily Brew.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -167,6 +169,13 @@
     <button class="btn btn-primary btn-block" id="cart-checkout-btn" type="button">Continue to checkout</button>
   </div>
 </aside>
+
+<!-- ================= MOBILE CART BAR ================= -->
+<button class="cart-bar" id="cart-bar" type="button" hidden>
+  <span class="cart-bar-count" id="cart-bar-count"></span>
+  <span>View cart</span>
+  <strong id="cart-bar-total"></strong>
+</button>
 
 <!-- ================= TOASTS ================= -->
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
